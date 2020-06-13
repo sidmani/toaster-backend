@@ -39,7 +39,7 @@ def clearLEDs():
 
 def clearRelays():
     for r in RELAY:
-        GPIO.output(r, False)
+        GPIO.output(r, True)
 
 
 def heat():
@@ -47,11 +47,11 @@ def heat():
     GPIO.output(LED[0], True)
 
     # enable both heating elements
-    GPIO.output(TOP_ELEMENT, True)
-    GPIO.output(BOTTOM_ELEMENT, True)
+    GPIO.output(TOP_ELEMENT, False)
+    GPIO.output(BOTTOM_ELEMENT, False)
 
     # enable the fan
-    GPIO.output(FAN, True)
+    GPIO.output(FAN, False)
 
 
 def standby():
