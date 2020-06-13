@@ -62,6 +62,7 @@ async def startProfile():
 
     pid = PID(1, 0.1, 0.05)
     sch.enter(TIME_RESOLUTION, 1, updateProfile, (TIME_RESOLUTION, pid, Delta))
+    sch.run()
 
 
 @app.post('/stop')
@@ -75,6 +76,7 @@ async def stopProfile():
 
 
 def updateProfile(t, pid, profile):
+    global targetTemp, tempData, targetData
     temp = temperature()
 
     targetTemp = profile(t)
@@ -97,3 +99,4 @@ def updateProfile(t, pid, profile):
         setState(State.COOL)
 
     sch.enter(TIME_RESOLUTION, 1, updateProfile, (t + TIME_RESOLUTION, pid, profile))
+    sch.run()
