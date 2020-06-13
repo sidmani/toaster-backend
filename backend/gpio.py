@@ -5,6 +5,7 @@ from enum import Enum
 class State(Enum):
     STANDBY = 0
     HEAT = 1
+    COOL = 2
 
 
 try:
@@ -75,3 +76,5 @@ def setState(s):
         standby()
     elif s == State.HEAT:
         heat()
+    elif s == State.COOL:
+        cool()
