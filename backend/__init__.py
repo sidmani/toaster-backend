@@ -2,6 +2,7 @@ import sched
 import time
 from simple_pid import PID
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from .gpio import initGPIO, setState, State
 from .thermo import initThermo, temperature
 from .profiles import Delta
@@ -17,6 +18,13 @@ profile = 'delta'
 setState(state)
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
 
 tempData = []
 targetData = []
