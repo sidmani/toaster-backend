@@ -51,15 +51,27 @@ async def getState():
 
 @app.post('/run')
 async def startProfile():
-    global state
+    global state, tempData, targetData
     if state != State.STANDBY:
         raise Exception('Already running!')
 
+    tempData = []
+    targetData = []
     state = State.COOL
     setState(state)
 
     pid = PID(1, 0.1, 0.05)
     sch.enter(TIME_RESOLUTION, 1, updateProfile, (TIME_RESOLUTION, pid, Delta))
+
+
+@app.post('/stop')
+async def stopProfile():
+    global state, tempData, targetData
+    state = State.STANDBY
+    setState(state)
+
+    tempData = []
+    targetData = []
 
 
 def updateProfile(t, pid, profile):
