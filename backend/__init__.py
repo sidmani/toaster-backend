@@ -1,5 +1,6 @@
-from threading import Timer
+import time
 from simple_pid import PID
+from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .gpio import initGPIO, setState, State
@@ -13,6 +14,8 @@ state = State.STANDBY
 profile = 'delta'
 
 setState(state)
+
+sch = BackgroundScheduler()
 
 app = FastAPI()
 app.add_middleware(
@@ -58,9 +61,14 @@ async def startProfile():
     setState(state)
 
     pid = PID(1, 0.1, 0.05)
+    startTime = time.time()
 
-    t = Timer(TIME_RESOLUTION, updateProfile, (TIME_RESOLUTION, pid, Delta))
-    t.start()
+    sch.add_interval_job(
+        updateProfile,
+        'heat_cycle',
+        seconds=TIME_RESOLUTION,
+        args=(startTime, pid, Delta),
+    )
 
 
 @app.post('/stop')
@@ -71,13 +79,14 @@ async def stopProfile():
 
     tempData = []
     targetData = []
+    sch.remove_job('heat_cycle')
 
 
-def updateProfile(t, pid, profile):
+def updateProfile(startTime, pid, profile):
     global targetTemp, tempData, targetData
     temp = temperature()
 
-    targetTemp = profile(t)
+    targetTemp = profile(time.time() - startTime)
     if (targetTemp == -1):
         state = State.STANDBY
         setState(state)
@@ -95,6 +104,3 @@ def updateProfile(t, pid, profile):
         setState(State.HEAT)
     else:
         setState(State.COOL)
-
-    t = Timer(TIME_RESOLUTION, updateProfile, (t + TIME_RESOLUTION, pid, profile))
-    t.start()
