@@ -14,3 +14,10 @@ def initGPIO():
     for r in RELAY:
         GPIO.setup(r, GPIO.OUT)
         GPIO.output(r, True)
+
+    for l in LED:
+        GPIO.setup(l, GPIO.OUT)
+        GPIO.output(l, False)
+
+def setLED(i, mode):
+    GPIO.set(LED[i], mode)
