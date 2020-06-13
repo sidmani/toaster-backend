@@ -63,7 +63,8 @@ async def startProfile():
     state = State.COOL
     setState(state)
 
-    pid = PID(1, 0.1, 0.05)
+    pid = PID(2, 0.1, 0.05)
+    pid.output_limits = (10, None)
     startTime = time.time()
 
     sch.add_job(
