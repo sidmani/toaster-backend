@@ -54,6 +54,14 @@ def heat():
     GPIO.output(FAN, False)
 
 
+def cool():
+    # set center LED
+    GPIO.output(LED[1], True)
+
+    # enable fan
+    GPIO.output(FAN, False)
+
+
 def standby():
     # set 3rd LED
     GPIO.output(LED[2], True)
