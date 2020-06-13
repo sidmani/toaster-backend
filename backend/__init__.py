@@ -1,13 +1,10 @@
-import sched
-import time
+from threading import Timer
 from simple_pid import PID
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .gpio import initGPIO, setState, State
 from .thermo import initThermo, temperature
 from .profiles import Delta
-
-sch = sched.scheduler(time.time, time.sleep)
 
 initGPIO()
 initThermo()
@@ -61,8 +58,9 @@ async def startProfile():
     setState(state)
 
     pid = PID(1, 0.1, 0.05)
-    sch.enter(TIME_RESOLUTION, 1, updateProfile, (TIME_RESOLUTION, pid, Delta))
-    sch.run(blocking=False)
+
+    t = Timer(TIME_RESOLUTION, updateProfile, (TIME_RESOLUTION, pid, Delta))
+    t.start()
 
 
 @app.post('/stop')
@@ -98,5 +96,5 @@ def updateProfile(t, pid, profile):
     else:
         setState(State.COOL)
 
-    sch.enter(TIME_RESOLUTION, 1, updateProfile, (t + TIME_RESOLUTION, pid, profile))
-    sch.run(blocking=False)
+    t = Timer(TIME_RESOLUTION, updateProfile, (t + TIME_RESOLUTION, pid, profile))
+    t.start()
