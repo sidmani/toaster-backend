@@ -33,24 +33,25 @@ TIME_RESOLUTION = 1
 
 
 @app.get('/data')
-def data():
+async def data():
     return {"temp": tempData, "target": targetData}
 
 
 @app.get('/temp')
-def getTemp():
+async def getTemp():
     return {"temp": temperature()}
 
 
 @app.get('/state')
-def getState():
+async def getState():
     if state == State.STANDBY:
         return {"state": "standby"}
     return {"state": "running", "profile": profile}
 
 
 @app.post('/run')
-def startProfile():
+async def startProfile():
+    global state
     if state != State.STANDBY:
         raise Exception('Already running!')
 
