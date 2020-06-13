@@ -20,4 +20,4 @@ def initGPIO():
         GPIO.output(l, False)
 
 def setLED(i, mode):
-    GPIO.set(LED[i], mode)
+    GPIO.output(LED[i], mode)
