@@ -12,18 +12,33 @@ initGPIO()
 initThermo()
 
 state = State.STANDBY
+profile = 'delta'
+
 setState(state)
 
 app = FastAPI()
 
-targetTemp = 0
+tempData = []
+targetData = []
 
 TIME_RESOLUTION = 1
 
 
-@app.get('/temperature')
-def getTemperature():
-    return {"t": temperature()}
+@app.get('/data')
+def data():
+    return {"temp": tempData, "target": targetData}
+
+
+@app.get('/temp')
+def getTemp():
+    return {"temp": temperature()}
+
+
+@app.get('/state')
+def getState():
+    if state == State.STANDBY:
+        return {"state": "standby"}
+    return {"state": "running", "profile": profile}
 
 
 @app.post('/run')
@@ -45,7 +60,12 @@ def updateProfile(t, pid, profile):
     if (targetTemp == -1):
         state = State.STANDBY
         setState(state)
+        tempData = []
+        targetData = []
         return
+
+    tempData.append(temp)
+    targetData.append(targetTemp)
 
     pid.setpoint = targetTemp
     result = pid(temp)
