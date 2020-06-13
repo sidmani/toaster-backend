@@ -18,7 +18,7 @@ app = FastAPI()
 
 targetTemp = 0
 
-TIME_RESOLUTION = 0.5
+TIME_RESOLUTION = 1
 
 
 @app.get('/temperature')
@@ -35,20 +35,24 @@ def startProfile():
     setState(state)
 
     pid = PID(1, 0.1, 0.05)
-    sch.enter(TIME_RESOLUTION, 1, updateProfile, (TIME_RESOLUTION, pid))
+    sch.enter(TIME_RESOLUTION, 1, updateProfile, (TIME_RESOLUTION, pid, Delta))
 
 
-def updateProfile(t, pid):
+def updateProfile(t, pid, profile):
     temp = temperature()
-    if (temp == -1):
+
+    targetTemp = profile(t)
+    if (targetTemp == -1):
         state = State.STANDBY
         setState(state)
+        return
 
-    pid.setpoint = Delta(t)
+    pid.setpoint = targetTemp
     result = pid(temp)
+
     if result < temp:
         setState(State.HEAT)
     else:
         setState(State.COOL)
 
-    sch.enter(TIME_RESOLUTION, 1, updateProfile, (t + TIME_RESOLUTION, pid))
+    sch.enter(TIME_RESOLUTION, 1, updateProfile, (t + TIME_RESOLUTION, pid, profile))
