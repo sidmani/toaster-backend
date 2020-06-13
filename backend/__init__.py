@@ -104,7 +104,7 @@ def updateProfile(startTime, pid, profile):
     result = pid(temp)
     pidData.append(result)
 
-    if result < temp:
+    if temp < result:
         setState(State.HEAT)
     else:
         setState(State.COOL)
