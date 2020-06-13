@@ -16,6 +16,7 @@ profile = 'delta'
 setState(state)
 
 sch = BackgroundScheduler()
+sch.start()
 
 app = FastAPI()
 app.add_middleware(
