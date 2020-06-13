@@ -28,13 +28,14 @@ app.add_middleware(
 
 tempData = []
 targetData = []
+pidData = []
 
 TIME_RESOLUTION = 1
 
 
 @app.get('/data')
 async def data():
-    return {"temp": tempData, "target": targetData}
+    return {"temp": tempData, "target": targetData, "pid": pidData}
 
 
 @app.get('/temp')
@@ -51,12 +52,13 @@ async def getState():
 
 @app.post('/run')
 async def startProfile():
-    global state, tempData, targetData
+    global state, tempData, targetData, pidData
     if state != State.STANDBY:
         raise Exception('Already running!')
 
     tempData = []
     targetData = []
+    pidData = []
     state = State.COOL
     setState(state)
 
@@ -74,25 +76,23 @@ async def startProfile():
 
 @app.post('/stop')
 async def stopProfile():
-    global state, tempData, targetData
+    global state, tempData, targetData, pidData
     state = State.STANDBY
     setState(state)
 
     tempData = []
     targetData = []
+    pidData = []
     sch.remove_job('heat_cycle')
 
 
 def updateProfile(startTime, pid, profile):
-    global targetTemp, tempData, targetData
+    global state, tempData, targetData, pidData
     temp = temperature()
 
     targetTemp = profile(time.time() - startTime)
     if (targetTemp == -1):
-        state = State.STANDBY
-        setState(state)
-        tempData = []
-        targetData = []
+        stopProfile()
         return
 
     tempData.append(temp)
@@ -100,6 +100,7 @@ def updateProfile(startTime, pid, profile):
 
     pid.setpoint = targetTemp
     result = pid(temp)
+    pidData.append(result)
 
     if result < temp:
         setState(State.HEAT)
