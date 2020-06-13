@@ -62,7 +62,7 @@ async def startProfile():
 
     pid = PID(1, 0.1, 0.05)
     sch.enter(TIME_RESOLUTION, 1, updateProfile, (TIME_RESOLUTION, pid, Delta))
-    sch.run()
+    sch.run(blocking=False)
 
 
 @app.post('/stop')
@@ -99,4 +99,4 @@ def updateProfile(t, pid, profile):
         setState(State.COOL)
 
     sch.enter(TIME_RESOLUTION, 1, updateProfile, (t + TIME_RESOLUTION, pid, profile))
-    sch.run()
+    sch.run(blocking=False)
