@@ -63,9 +63,10 @@ async def startProfile():
     pid = PID(1, 0.1, 0.05)
     startTime = time.time()
 
-    sch.add_interval_job(
+    sch.add_job(
         updateProfile,
-        'heat_cycle',
+        'interval',
+        id='heat_cycle',
         seconds=TIME_RESOLUTION,
         args=(startTime, pid, Delta),
     )
