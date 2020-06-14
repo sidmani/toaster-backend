@@ -25,7 +25,7 @@ sch.start()
 
 pid = PID(4, 0.3, 1, setpoint=15)
 pid.proportional_on_measurement = True
-pid.output_limits = (-10, 10)
+# pid.output_limits = (-10, 10)
 armed = False
 
 
