@@ -99,7 +99,7 @@ async def preheat():
     except Exception:
         pass
 
-    pid = PID(0.2, 0.01, -0.2, setpoint=40)
+    pid = PID(0.2, 0, 1.5, setpoint=40)
     # pid.output_limits = (, None)
     # pid.proportional_on_measurement = True
     sch.add_job(
@@ -149,9 +149,6 @@ async def startProfile():
 async def stopProfile():
     global tempData, targetData, pidData
 
-    tempData = []
-    targetData = []
-    pidData = []
     standby()
     try:
         sch.remove_job('heat_cycle')
