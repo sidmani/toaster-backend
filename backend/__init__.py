@@ -136,7 +136,11 @@ async def stopProfile():
     tempData = []
     targetData = []
     pidData = []
-    sch.remove_job('heat_cycle')
+    standby()
+    try:
+        sch.remove_job('heat_cycle')
+    except Exception:
+        pass
 
 
 # def updateProfile(startTime, pid, profile):
