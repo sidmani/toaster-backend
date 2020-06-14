@@ -26,6 +26,7 @@ sch.start()
 pid = PID(4, 0.3, 1, setpoint=15)
 pid.proportional_on_measurement = True
 pid.output_limits = (-10, 10)
+armed = False
 
 
 def pidLoop(pid):
@@ -33,6 +34,10 @@ def pidLoop(pid):
     result = pid(temp)
     p, i, d = pid.components
     addData(temp, pid.setpoint, p, i, d)
+
+    if not armed:
+        return
+
     if (result > 0):
         heat()
     else:
@@ -108,6 +113,12 @@ async def preheat():
     pid.setpoint = 40
 
 
+@app.post('/arm')
+async def arm():
+    global armed
+    armed = True
+
+
 class PIDModel(BaseModel):
     p: float
     i: float
@@ -156,3 +167,4 @@ async def stop():
     standby()
     state = State.STANDBY
     pid.setpoint = 15
+
