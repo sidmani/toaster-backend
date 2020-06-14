@@ -113,7 +113,7 @@ class PIDModel(BaseModel):
     d: float
 
 
-@app.post('/pid')
+@app.post('/pid_set')
 async def setPID(req: PIDModel):
     global pid
     pid.Kp = req.p
