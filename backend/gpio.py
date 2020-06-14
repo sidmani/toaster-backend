@@ -47,7 +47,7 @@ def heat():
     GPIO.output(BOTTOM_ELEMENT, False)
 
     # enable the fan
-    GPIO.output(FAN, False)
+    # GPIO.output(FAN, False)
 
 
 def cool():
