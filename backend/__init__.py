@@ -99,8 +99,8 @@ async def preheat():
     except Exception:
         pass
 
-    pid = PID(1, 0.01, 0.01, setpoint=40)
-    pid.output_limits = (20, None)
+    pid = PID(0.2, 0.01, 0.01, setpoint=40)
+    # pid.output_limits = (, None)
     pid.proportional_on_measurement = True
     sch.add_job(
         preheatHandler,
@@ -116,7 +116,7 @@ def preheatHandler(pid):
     result = pid(temp)
     p, i, d = pid.components
     addData(temp, 40, p, i, d)
-    if (result > temp):
+    if (result > 0):
         heat()
     else:
         cool()
