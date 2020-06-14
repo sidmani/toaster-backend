@@ -22,7 +22,7 @@ standby()
 sch = BackgroundScheduler()
 sch.start()
 
-pid = PID(1, 0.5, 0.2, setpoint=temperature())
+pid = PID(1, 0.5, 0.2, setpoint=25)
 # pid.proportional_on_measurement = True
 
 
