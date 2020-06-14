@@ -99,7 +99,7 @@ async def preheat():
     except Exception:
         pass
 
-    pid = PID(0.07, 0.03, 0.01, setpoint=40)
+    pid = PID(1, 0.03, 0.01, setpoint=40)
     sch.add_job(
         preheatHandler,
         'interval',
