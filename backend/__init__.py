@@ -85,7 +85,7 @@ async def preheat():
     except Exception:
         pass
 
-    pid = PID(0.05, 0.1, 0.8)
+    pid = PID(0.05, 0.1, 0.05)
     pid.setpoint = 40
     sch.add_job(
         preheatHandler,
@@ -118,6 +118,8 @@ async def startProfile():
     cool()
 
     pid = PID(1, 0.1, 0.05)
+    pid.output_limits = (20, None)
+    pid.proportional_on_measurement = True
     startTime = time.time()
 
     sch.add_job(
