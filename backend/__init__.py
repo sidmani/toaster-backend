@@ -100,6 +100,8 @@ async def preheat():
         pass
 
     pid = PID(1, 0.01, 0.01, setpoint=40)
+    pid.output_limits = (20, None)
+    pid.proportional_on_measurement = True
     sch.add_job(
         preheatHandler,
         'interval',
@@ -114,7 +116,7 @@ def preheatHandler(pid):
     result = pid(temp)
     p, i, d = pid.components
     addData(temp, 40, p, i, d)
-    if (result + temp < 40):
+    if (result > temp):
         heat()
     else:
         cool()
@@ -132,8 +134,6 @@ async def startProfile():
     cool()
 
     pid = PID(1, 0.1, 0.05)
-    pid.output_limits = (20, None)
-    pid.proportional_on_measurement = True
     startTime = time.time()
 
     sch.add_job(
