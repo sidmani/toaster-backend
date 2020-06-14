@@ -57,7 +57,7 @@ def cool():
     GPIO.output(LED[1], True)
 
     # enable fan
-    GPIO.output(FAN, False)
+    # GPIO.output(FAN, False)
 
 
 def standby():
