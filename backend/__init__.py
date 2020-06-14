@@ -99,6 +99,7 @@ async def preheat():
 def preheatHandler(pid):
     temp = temperature()
     result = pid(temp)
+    addData(temp, 40, result)
     if (result > temp):
         heat()
     else:
