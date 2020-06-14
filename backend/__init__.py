@@ -106,11 +106,15 @@ async def getState():
     return {"state": "running", "profile": "delta"}
 
 
+class PreheatTemp(BaseModel):
+    temp: float
+
+
 @app.post('/preheat')
-async def preheat():
+async def preheat(data: PreheatTemp):
     global state
     state = State.PREHEAT
-    pid.setpoint = 40
+    pid.setpoint = data.temp
 
 
 @app.post('/arm')
