@@ -36,6 +36,23 @@ tempData = []
 targetData = []
 pidData = []
 
+MAX_LEN = 200
+
+def addData(temp, target, pid):
+    tempData.append(temp)
+    targetData.append(target)
+    pidData.append(pid)
+
+    if len(tempData) > MAX_LEN:
+        tempData.pop(0)
+
+    if len(targetData) > MAX_LEN:
+        targetData.pop(0)
+
+    if len(pidData) > MAX_LEN:
+        pidData.pop(0)
+
+
 TIME_RESOLUTION = 1
 
 
@@ -63,7 +80,11 @@ async def preheat():
     global state
     state = State.PREHEAT
 
-    sch.remove_job('heat_cycle')
+    try:
+        sch.remove_job('heat_cycle')
+    except Exception:
+        pass
+
     pid = PID(1, 0.1, 0.05)
     pid.setpoint = 40
     sch.add_job(
@@ -117,23 +138,23 @@ async def stopProfile():
     sch.remove_job('heat_cycle')
 
 
-def updateProfile(startTime, pid, profile):
-    global state, tempData, targetData, pidData
-    temp = temperature()
+# def updateProfile(startTime, pid, profile):
+#     global state, tempData, targetData, pidData
+#     temp = temperature()
 
-    targetTemp = profile(time.time() - startTime)
-    if (targetTemp == -1):
-        stopProfile()
-        return
+#     targetTemp = profile(time.time() - startTime)
+#     if (targetTemp == -1):
+#         stopProfile()
+#         return
 
-    tempData.append(temp)
-    targetData.append(targetTemp)
+#     tempData.append(temp)
+#     targetData.append(targetTemp)
 
-    pid.setpoint = targetTemp
-    result = pid(temp)
-    pidData.append(result)
+#     pid.setpoint = targetTemp
+#     result = pid(temp)
+#     pidData.append(result)
 
-    if temp < result:
-        heat()
-    else:
-        cool()
+#     if temp < result:
+#         heat()
+#     else:
+#         cool()
