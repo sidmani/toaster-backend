@@ -1,12 +1,4 @@
 import importlib.util
-from enum import Enum
-
-
-class State(Enum):
-    STANDBY = 0
-    HEAT = 1
-    COOL = 2
-
 
 try:
     importlib.util.find_spec('RPi.GPIO')
@@ -45,6 +37,8 @@ def clearRelays():
 
 
 def heat():
+    clearLEDs()
+    clearRelays()
     # set the red LED
     GPIO.output(LED[0], True)
 
@@ -57,6 +51,8 @@ def heat():
 
 
 def cool():
+    clearLEDs()
+    clearRelays()
     # set center LED
     GPIO.output(LED[1], True)
 
@@ -65,17 +61,7 @@ def cool():
 
 
 def standby():
-    # set 3rd LED
-    GPIO.output(LED[2], True)
-
-
-def setState(s):
     clearLEDs()
     clearRelays()
-
-    if s == State.STANDBY:
-        standby()
-    elif s == State.HEAT:
-        heat()
-    elif s == State.COOL:
-        cool()
+    # set 3rd LED
+    GPIO.output(LED[2], True)

@@ -3,17 +3,22 @@ from simple_pid import PID
 from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .gpio import initGPIO, setState, State
+from .gpio import initGPIO, heat, cool, standby
 from .thermo import initThermo, temperature
 from .profiles import Delta
+from enum import Enum
+
+
+class State(Enum):
+    STANDBY = 0
+    PREHEAT = 1
+    PROFILE = 2
+
 
 initGPIO()
 initThermo()
-
 state = State.STANDBY
-profile = 'delta'
-
-setState(state)
+standby()
 
 sch = BackgroundScheduler()
 sch.start()
@@ -48,7 +53,35 @@ async def getTemp():
 async def getState():
     if state == State.STANDBY:
         return {"state": "standby"}
-    return {"state": "running", "profile": profile}
+    elif state == State.PREHEAT:
+        return {"state": "preheat"}
+    return {"state": "running", "profile": "delta"}
+
+
+@app.post('/preheat')
+async def preheat():
+    global state
+    state = State.PREHEAT
+
+    sch.remove_job('heat_cycle')
+    pid = PID(1, 0.1, 0.05)
+    pid.setpoint = 40
+    sch.add_job(
+        preheatHandler,
+        'interval',
+        id='heat_cycle',
+        seconds=TIME_RESOLUTION,
+        args=(pid,),
+    )
+
+
+def preheatHandler(pid):
+    temp = temperature()
+    result = pid(temp)
+    if (result > temp):
+        heat()
+    else:
+        cool()
 
 
 @app.post('/run')
@@ -60,11 +93,9 @@ async def startProfile():
     tempData = []
     targetData = []
     pidData = []
-    state = State.COOL
-    setState(state)
+    cool()
 
     pid = PID(1, 0.1, 0.05)
-    pid.output_limits = (10, None)
     startTime = time.time()
 
     sch.add_job(
@@ -78,9 +109,7 @@ async def startProfile():
 
 @app.post('/stop')
 async def stopProfile():
-    global state, tempData, targetData, pidData
-    state = State.STANDBY
-    setState(state)
+    global tempData, targetData, pidData
 
     tempData = []
     targetData = []
@@ -105,6 +134,6 @@ def updateProfile(startTime, pid, profile):
     pidData.append(result)
 
     if temp < result:
-        setState(State.HEAT)
+        heat()
     else:
-        setState(State.COOL)
+        cool()
