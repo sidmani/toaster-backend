@@ -23,7 +23,7 @@ standby()
 sch = BackgroundScheduler()
 sch.start()
 
-pid = PID(4, 0.3, 1, setpoint=25)
+pid = PID(4, 0.3, 1, setpoint=15)
 pid.proportional_on_measurement = True
 pid.output_limits = (-10, 10)
 
@@ -155,4 +155,4 @@ async def stop():
     global state
     standby()
     state = State.STANDBY
-    pid.setpoint = 25
+    pid.setpoint = 15
