@@ -15,7 +15,7 @@ def temperature():
     return sign * float(((b[0] & 0x7f) << 6) + ((b[1] & 0xFC) >> 2)) / 4
 
 
-def temperature_avg(count=5):
+def temperature_avg(count=20):
     s = 0
     for i in range(count):
         s += temperature()
