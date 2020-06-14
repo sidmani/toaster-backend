@@ -113,7 +113,7 @@ def preheatHandler(pid):
     temp = temperature()
     result = pid(temp)
     p, i, d = pid.components
-    addData(temp, 40, result, p, i, d)
+    addData(temp, 40, p, i, d)
     if (result > temp):
         heat()
     else:
