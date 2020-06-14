@@ -23,7 +23,7 @@ standby()
 sch = BackgroundScheduler()
 sch.start()
 
-pid = PID(4, 0.3, 1, setpoint=23)
+pid = PID(4.8, 0.047, 5, setpoint=23)
 pid.proportional_on_measurement = True
 armed = False
 
