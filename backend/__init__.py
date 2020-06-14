@@ -34,14 +34,18 @@ app.add_middleware(
 
 tempData = []
 targetData = []
-pidData = []
+pidData_p = []
+pidData_i = []
+pidData_d = []
 
 MAX_LEN = 200
 
-def addData(temp, target, pid):
+def addData(temp, target, p, i, d):
     tempData.append(temp)
     targetData.append(target)
-    pidData.append(pid)
+    pidData_p.append(p)
+    pidData_i.append(i)
+    pidData_d.append(d)
 
     if len(tempData) > MAX_LEN:
         tempData.pop(0)
@@ -49,8 +53,12 @@ def addData(temp, target, pid):
     if len(targetData) > MAX_LEN:
         targetData.pop(0)
 
-    if len(pidData) > MAX_LEN:
-        pidData.pop(0)
+    if len(pidData_p) > MAX_LEN:
+        pidData_p.pop(0)
+    if len(pidData_d) > MAX_LEN:
+        pidData_d.pop(0)
+    if len(pidData_i) > MAX_LEN:
+        pidData_i.pop(0)
 
 
 TIME_RESOLUTION = 1
@@ -58,7 +66,13 @@ TIME_RESOLUTION = 1
 
 @app.get('/data')
 async def data():
-    return {"temp": tempData, "target": targetData, "pid": pidData}
+    return {
+        "temp": tempData,
+        "target": targetData,
+        "p": pidData_p,
+        "i": pidData_i,
+        "d": pidData_d,
+    }
 
 
 @app.get('/temp')
@@ -85,8 +99,7 @@ async def preheat():
     except Exception:
         pass
 
-    pid = PID(0.07, 0.03, 0.01)
-    pid.setpoint = 40
+    pid = PID(0.07, 0.03, 0.01, setpoint=40)
     sch.add_job(
         preheatHandler,
         'interval',
@@ -99,7 +112,8 @@ async def preheat():
 def preheatHandler(pid):
     temp = temperature()
     result = pid(temp)
-    addData(temp, 40, result)
+    p, i, d = pid.components
+    addData(temp, 40, result, p, i, d)
     if (result > temp):
         heat()
     else:
