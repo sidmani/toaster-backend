@@ -25,6 +25,7 @@ sch.start()
 
 pid = PID(1, 0.01, 1, setpoint=25)
 pid.proportional_on_measurement = True
+pid.output_limits = (-10, 10)
 
 
 def pidLoop(pid):
