@@ -23,7 +23,7 @@ standby()
 sch = BackgroundScheduler()
 sch.start()
 
-pid = PID(1, 0.005, 0.2, setpoint=40)
+pid = PID(1, 0.005, 0.2, setpoint=0)
 pid.proportional_on_measurement = True
 
 
@@ -65,24 +65,16 @@ MAX_LEN = 200
 
 
 def addData(temp, target, p, i, d):
-    tempData.append(temp)
-    targetData.append(target)
-    pidData_p.append(p)
-    pidData_i.append(i)
-    pidData_d.append(d)
+    def add(arr, x):
+        arr.append(x)
+        if len(arr) > MAX_LEN:
+            arr.pop(0)
 
-    if len(tempData) > MAX_LEN:
-        tempData.pop(0)
-
-    if len(targetData) > MAX_LEN:
-        targetData.pop(0)
-
-    if len(pidData_p) > MAX_LEN:
-        pidData_p.pop(0)
-    if len(pidData_d) > MAX_LEN:
-        pidData_d.pop(0)
-    if len(pidData_i) > MAX_LEN:
-        pidData_i.pop(0)
+    add(tempData, temp)
+    add(targetData, target)
+    add(pidData_p, p)
+    add(pidData_i, i)
+    add(pidData_d, d)
 
 
 TIME_RESOLUTION = 1
