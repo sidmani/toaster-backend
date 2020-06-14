@@ -23,7 +23,7 @@ standby()
 sch = BackgroundScheduler()
 sch.start()
 
-pid = PID(4, 0.3, 1, setpoint=15)
+pid = PID(4, 0.3, 1, setpoint=24)
 pid.proportional_on_measurement = True
 # pid.output_limits = (-10, 10)
 armed = False
@@ -141,7 +141,6 @@ async def setPID(req: PIDModel):
 async def getPID():
     return {"p": pid.Kp, "i": pid.Ki, "d": pid.Kd}
 
-
 # @app.post('/run')
 # async def startProfile():
 #     # global state, tempData, targetData, pidData
@@ -168,8 +167,9 @@ async def getPID():
 @app.post('/stop')
 async def stop():
     global state, armed
+    pid.reset()
     standby()
     state = State.STANDBY
-    pid.setpoint = 15
+    pid.setpoint = temperature()
     armed = False
 
