@@ -154,5 +154,5 @@ async def getPID():
 async def stop():
     global state
     standby()
-    state = State.standby
+    state = State.STANDBY
     pid.setpoint = 25
