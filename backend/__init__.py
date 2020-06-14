@@ -25,7 +25,6 @@ sch.start()
 
 pid = PID(4, 0.3, 1, setpoint=23)
 pid.proportional_on_measurement = True
-# pid.output_limits = (-10, 10)
 armed = False
 
 
@@ -112,15 +111,11 @@ class PreheatTemp(BaseModel):
 
 @app.post('/preheat')
 async def preheat(data: PreheatTemp):
-    global state
+    global state, armed
+    armed = True
+    pid.reset()
     state = State.PREHEAT
     pid.setpoint = data.temp
-
-
-@app.post('/arm')
-async def arm():
-    global armed
-    armed = True
 
 
 class PIDModel(BaseModel):
