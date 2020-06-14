@@ -163,8 +163,9 @@ async def getPID():
 
 @app.post('/stop')
 async def stop():
-    global state
+    global state, armed
     standby()
     state = State.STANDBY
     pid.setpoint = 15
+    armed = False
 
