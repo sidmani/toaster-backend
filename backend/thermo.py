@@ -1,6 +1,10 @@
+from apscheduler.schedulers.background import BackgroundScheduler
 import spidev
 
 spi = spidev.SpiDev()
+sch = BackgroundScheduler()
+sch.start()
+currentTmp = 0
 
 
 def initThermo():
@@ -9,15 +13,29 @@ def initThermo():
     spi.mode = 0
 
 
-def temperature():
+def read_temperature():
     b = spi.readbytes(4)
-    sign = -1 if (b[0] & 0x80) else 1
-    return sign * float(((b[0] & 0x7f) << 6) + ((b[1] & 0xFC) >> 2)) / 4
+    return float(((b[0] & 0x7f) << 6) + ((b[1] & 0xFC) >> 2)) / 4
 
 
-def temperature_avg(count=20):
-    s = 0
-    for i in range(count):
-        s += temperature()
+def update_temperature(prevArr):
+    global currentTmp
+    if len(prevArr) == 5:
+        prevArr.pop(0)
 
-    return s / count
+    prevArr.append(read_temperature())
+    currentTmp = sum(prevArr) / len(prevArr)
+
+
+def temperature():
+    return currentTmp
+
+
+tempLog = []
+sch.add_job(
+    update_temperature,
+    'interval',
+    id='temperature',
+    seconds=0.2,
+    args=(tempLog,)
+)

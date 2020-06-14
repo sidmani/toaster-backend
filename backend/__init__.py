@@ -1,10 +1,9 @@
-import time
 from simple_pid import PID
 from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .gpio import initGPIO, heat, cool, standby
-from .thermo import initThermo, temperature_avg
+from .thermo import initThermo, temperature
 from .profiles import Delta
 from enum import Enum
 
@@ -23,15 +22,15 @@ standby()
 sch = BackgroundScheduler()
 sch.start()
 
-pid = PID(1, 0.005, 0.2, setpoint=temperature_avg())
-pid.proportional_on_measurement = True
+pid = PID(1, 0.5, 0.2, setpoint=temperature())
+# pid.proportional_on_measurement = True
 
 
 def pidLoop(pid):
-    temp = temperature_avg()
+    temp = temperature()
     result = pid(temp)
     p, i, d = pid.components
-    addData(temp, 40, p, i, d)
+    addData(temp, pid.setpoint, p, i, d)
     if (result > 0):
         heat()
     else:
@@ -61,13 +60,11 @@ pidData_p = []
 pidData_i = []
 pidData_d = []
 
-MAX_LEN = 200
-
 
 def addData(temp, target, p, i, d):
     def add(arr, x):
         arr.append(x)
-        if len(arr) > MAX_LEN:
+        if len(arr) > 200:
             arr.pop(0)
 
     add(tempData, temp)
@@ -75,9 +72,6 @@ def addData(temp, target, p, i, d):
     add(pidData_p, p)
     add(pidData_i, i)
     add(pidData_d, d)
-
-
-TIME_RESOLUTION = 1
 
 
 @app.get('/data')
@@ -93,7 +87,7 @@ async def data():
 
 @app.get('/temp')
 async def getTemp():
-    return {"temp": temperature_avg()}
+    return {"temp": temperature()}
 
 
 @app.get('/state')
@@ -112,52 +106,30 @@ async def preheat():
     pid.setpoint = 40
 
 
-@app.post('/run')
-async def startProfile():
-    global state, tempData, targetData, pidData
-    if state != State.STANDBY:
-        raise Exception('Already running!')
+# @app.post('/run')
+# async def startProfile():
+#     # global state, tempData, targetData, pidData
+#     # if state != State.STANDBY:
+#     #     raise Exception('Already running!')
 
-    tempData = []
-    targetData = []
-    pidData = []
-    cool()
+#     # tempData = []
+#     # targetData = []
+#     # pidData = []
+#     # cool()
 
-    pid = PID(1, 0.1, 0.05)
-    startTime = time.time()
+#     # pid = PID(1, 0.1, 0.05)
+#     # startTime = time.time()
 
-    sch.add_job(
-        updateProfile,
-        'interval',
-        id='heat_cycle',
-        seconds=TIME_RESOLUTION,
-        args=(startTime, pid, Delta),
-    )
+#     # sch.add_job(
+#     #     updateProfile,
+#     #     'interval',
+#     #     id='heat_cycle',
+#     #     seconds=TIME_RESOLUTION,
+#     #     args=(startTime, pid, Delta),
+#     # )
 
 
 @app.post('/stop')
 async def stopProfile():
     standby()
     pid.setpoint = 0
-
-
-# def updateProfile(startTime, pid, profile):
-#     global state, tempData, targetData, pidData
-#     temp = temperature()
-
-#     targetTemp = profile(time.time() - startTime)
-#     if (targetTemp == -1):
-#         stopProfile()
-#         return
-
-#     tempData.append(temp)
-#     targetData.append(targetTemp)
-
-#     pid.setpoint = targetTemp
-#     result = pid(temp)
-#     pidData.append(result)
-
-#     if temp < result:
-#         heat()
-#     else:
-#         cool()
