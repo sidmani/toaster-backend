@@ -22,8 +22,8 @@ standby()
 sch = BackgroundScheduler()
 sch.start()
 
-pid = PID(1, 0.5, 0.2, setpoint=25)
-# pid.proportional_on_measurement = True
+pid = PID(1, 0.01, 1, setpoint=25)
+pid.proportional_on_measurement = True
 
 
 def pidLoop(pid):
@@ -132,4 +132,4 @@ async def preheat():
 @app.post('/stop')
 async def stopProfile():
     standby()
-    pid.setpoint = 0
+    pid.setpoint = 25
