@@ -23,6 +23,29 @@ standby()
 sch = BackgroundScheduler()
 sch.start()
 
+pid = PID(1, 0.005, 0.2, setpoint=40)
+pid.proportional_on_measurement = True
+
+
+def pidLoop(pid):
+    temp = temperature_avg()
+    result = pid(temp)
+    p, i, d = pid.components
+    addData(temp, 40, p, i, d)
+    if (result > 0):
+        heat()
+    else:
+        cool()
+
+
+sch.add_job(
+    pidLoop,
+    'interval',
+    id='heat_cycle',
+    seconds=1,
+    args=(pid,),
+)
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -39,6 +62,7 @@ pidData_i = []
 pidData_d = []
 
 MAX_LEN = 200
+
 
 def addData(temp, target, p, i, d):
     tempData.append(temp)
@@ -93,33 +117,7 @@ async def getState():
 async def preheat():
     global state
     state = State.PREHEAT
-
-    try:
-        sch.remove_job('heat_cycle')
-    except Exception:
-        pass
-
-    pid = PID(1, 0.005, 0.2, setpoint=40)
-    # pid.output_limits = (, None)
-    pid.proportional_on_measurement = True
-    sch.add_job(
-        preheatHandler,
-        'interval',
-        id='heat_cycle',
-        seconds=TIME_RESOLUTION,
-        args=(pid,),
-    )
-
-
-def preheatHandler(pid):
-    temp = temperature_avg()
-    result = pid(temp)
-    p, i, d = pid.components
-    addData(temp, 40, p, i, d)
-    if (result > 0):
-        heat()
-    else:
-        cool()
+    pid.setpoint = 40
 
 
 @app.post('/run')
@@ -147,13 +145,8 @@ async def startProfile():
 
 @app.post('/stop')
 async def stopProfile():
-    global tempData, targetData, pidData
-
     standby()
-    try:
-        sch.remove_job('heat_cycle')
-    except Exception:
-        pass
+    pid.setpoint = 0
 
 
 # def updateProfile(startTime, pid, profile):
