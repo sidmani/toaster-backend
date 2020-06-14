@@ -2,6 +2,7 @@ from simple_pid import PID
 from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from .gpio import initGPIO, heat, cool, standby
 from .thermo import initThermo, temperature
 from .profiles import Delta
@@ -106,6 +107,25 @@ async def preheat():
     pid.setpoint = 40
 
 
+class PIDModel(BaseModel):
+    p: float
+    i: float
+    d: float
+
+
+@app.post('/pid')
+async def setPID(req: PIDModel):
+    global pid
+    pid.Kp = req.p
+    pid.Ki = req.i
+    pid.Kd = req.d
+
+
+@app.get('/pid')
+async def getPID():
+    return {"p": pid.Kp, "i": pid.Ki, "d": pid.Kd}
+
+
 # @app.post('/run')
 # async def startProfile():
 #     # global state, tempData, targetData, pidData
@@ -130,6 +150,8 @@ async def preheat():
 
 
 @app.post('/stop')
-async def stopProfile():
+async def stop():
+    global state
     standby()
+    state = State.standby
     pid.setpoint = 25
