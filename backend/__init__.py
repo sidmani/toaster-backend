@@ -23,7 +23,7 @@ standby()
 sch = BackgroundScheduler()
 sch.start()
 
-pid = PID(4, 0.3, 1, setpoint=24)
+pid = PID(4, 0.3, 1, setpoint=23)
 pid.proportional_on_measurement = True
 # pid.output_limits = (-10, 10)
 armed = False
@@ -170,6 +170,6 @@ async def stop():
     pid.reset()
     standby()
     state = State.STANDBY
-    pid.setpoint = temperature()
+    pid.setpoint = 23
     armed = False
 
