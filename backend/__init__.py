@@ -4,7 +4,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .gpio import initGPIO, heat, cool, standby
-from .thermo import initThermo, temperature
+from .thermo import initThermo, temperature_avg
 from .profiles import Delta
 from enum import Enum
 
@@ -77,7 +77,7 @@ async def data():
 
 @app.get('/temp')
 async def getTemp():
-    return {"temp": temperature()}
+    return {"temp": temperature_avg()}
 
 
 @app.get('/state')
@@ -112,7 +112,7 @@ async def preheat():
 
 
 def preheatHandler(pid):
-    temp = temperature()
+    temp = temperature_avg()
     result = pid(temp)
     p, i, d = pid.components
     addData(temp, 40, p, i, d)

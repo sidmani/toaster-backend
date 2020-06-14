@@ -13,3 +13,11 @@ def temperature():
     b = spi.readbytes(4)
     sign = -1 if (b[0] & 0x80) else 1
     return sign * float(((b[0] & 0x7f) << 6) + ((b[1] & 0xFC) >> 2)) / 4
+
+
+def temperature_avg(count=5):
+    s = 0
+    for i in range(count):
+        s += temperature()
+
+    return s / count
