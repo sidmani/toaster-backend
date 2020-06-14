@@ -101,7 +101,7 @@ async def preheat():
 
     pid = PID(0.2, 0.01, 0.01, setpoint=40)
     # pid.output_limits = (, None)
-    pid.proportional_on_measurement = True
+    # pid.proportional_on_measurement = True
     sch.add_job(
         preheatHandler,
         'interval',
