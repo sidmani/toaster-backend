@@ -99,7 +99,7 @@ async def preheat():
     except Exception:
         pass
 
-    pid = PID(1, 0.005, 1, setpoint=40)
+    pid = PID(1, 0.005, 0.2, setpoint=40)
     # pid.output_limits = (, None)
     pid.proportional_on_measurement = True
     sch.add_job(
