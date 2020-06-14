@@ -114,7 +114,7 @@ def preheatHandler(pid):
     result = pid(temp)
     p, i, d = pid.components
     addData(temp, 40, p, i, d)
-    if (result > temp):
+    if (result + temp < 40):
         heat()
     else:
         cool()
