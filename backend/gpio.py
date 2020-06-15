@@ -59,6 +59,9 @@ def cool():
     # set center LED
     GPIO.output(LED[1], True)
 
+    GPIO.output(TOP_ELEMENT, True)
+    GPIO.output(BOTTOM_ELEMENT, True)
+
 
 def standby():
     clearLEDs()
