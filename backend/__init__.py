@@ -139,9 +139,11 @@ async def getPID():
 
 @app.post('/run')
 async def startProfile():
-    global pid, armed
+    global pid, armed, state
     armed = True
     startTime = time.time()
+    state = State.PROFILE
+    pid.reset()
     sch.add_job(
         setProfileTarget,
         'interval',
@@ -153,16 +155,15 @@ async def startProfile():
 
 def setProfileTarget(pid, startTime):
     global state
-    state = State.PROFILE
-    temp = temperature()
     elapsed = time.time() - startTime
-    if temp < 200 and elapsed < 240:
-        pid.setpoint = 220
+    if elapsed < 280:
+        pid.setpoint = 250
     else:
         pid.setpoint = 23
         if temperature() < 50:
             sch.remove_job('profile')
-        pid.setpoint = 23
+            state = State.STANDBY
+            standby()
 
 
 @app.post('/stop')
