@@ -70,7 +70,7 @@ pidData_d = []
 def addData(temp, target, p, i, d):
     def add(arr, x):
         arr.append(x)
-        if len(arr) > 200:
+        if len(arr) > 600:
             arr.pop(0)
 
     add(tempData, temp)
@@ -154,15 +154,15 @@ async def startProfile():
 def setProfileTarget(pid, startTime):
     global state
     state = State.PROFILE
-    currTime = time.time()
-    if currTime - startTime < 100:
-        pid.setpoint = 175
-    elif currTime - startTime < 225:
-        pid.setpoint = 240
+    temp = temperature()
+    elapsed = time.time() - startTime
+    if temp < 200 and elapsed < 240:
+        pid.setpoint = 220
     else:
         pid.setpoint = 23
         if temperature() < 50:
             sch.remove_job('profile')
+        pid.setpoint = 23
 
 
 @app.post('/stop')
