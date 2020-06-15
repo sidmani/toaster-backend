@@ -1,3 +1,4 @@
+import time
 from simple_pid import PID
 from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
@@ -5,7 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from .gpio import initGPIO, heat, cool, standby
 from .thermo import initThermo, temperature
-from .profiles import Delta
 from enum import Enum
 
 
@@ -136,35 +136,46 @@ async def setPID(req: PIDModel):
 async def getPID():
     return {"p": pid.Kp, "i": pid.Ki, "d": pid.Kd}
 
-# @app.post('/run')
-# async def startProfile():
-#     # global state, tempData, targetData, pidData
-#     # if state != State.STANDBY:
-#     #     raise Exception('Already running!')
 
-#     # tempData = []
-#     # targetData = []
-#     # pidData = []
-#     # cool()
+@app.post('/run')
+async def startProfile():
+    global pid, armed
+    armed = True
+    startTime = time.time()
+    sch.add_job(
+        setProfileTarget,
+        'interval',
+        id='profile',
+        seconds=1,
+        args=(pid, startTime),
+    )
 
-#     # pid = PID(1, 0.1, 0.05)
-#     # startTime = time.time()
 
-#     # sch.add_job(
-#     #     updateProfile,
-#     #     'interval',
-#     #     id='heat_cycle',
-#     #     seconds=TIME_RESOLUTION,
-#     #     args=(startTime, pid, Delta),
-#     # )
+def setProfileTarget(pid, startTime):
+    global state
+    state = State.PROFILE
+    currTime = time.time()
+    if currTime < 100:
+        pid.setpoint = 175
+    elif currTime < 225:
+        pid.setpoint = 240
+    else:
+        pid.setpoint = 23
+        if temperature() < 50:
+            sch.remove_job('profile')
 
 
 @app.post('/stop')
 async def stop():
     global state, armed
+
+    try:
+        sch.remove_job('profile')
+    except Exception:
+        pass
+
     pid.reset()
     standby()
     state = State.STANDBY
     pid.setpoint = 23
     armed = False
-
