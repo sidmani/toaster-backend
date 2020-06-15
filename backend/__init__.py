@@ -163,14 +163,15 @@ def setProfileTarget(pid, startTime):
             light(True)
             pid.setpoint = 23
             pid.reset()
+            return
 
-        if temperature() < 140:
-            fan(True)
-
-        if temperature() < 50:
+        temp = temperature()
+        if temp < 50:
             sch.remove_job('profile')
             state = State.STANDBY
             standby()
+        elif temp < 140:
+            fan(True)
 
 
 @app.post('/stop')
