@@ -156,8 +156,8 @@ async def startProfile():
 def setProfileTarget(pid, startTime):
     global state
     elapsed = time.time() - startTime
-    if elapsed < 260:
-        pid.setpoint = 250
+    if elapsed < 310:
+        pid.setpoint = 245
     else:
         if pid.setpoint != 23:
             light(True)
