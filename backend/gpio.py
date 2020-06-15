@@ -46,7 +46,6 @@ def light(state):
 
 def heat():
     clearLEDs()
-    clearRelays()
     # set the red LED
     GPIO.output(LED[0], True)
 
@@ -54,18 +53,11 @@ def heat():
     GPIO.output(TOP_ELEMENT, False)
     GPIO.output(BOTTOM_ELEMENT, False)
 
-    # enable the fan
-    # GPIO.output(FAN, False)
-
 
 def cool():
     clearLEDs()
-    clearRelays()
     # set center LED
     GPIO.output(LED[1], True)
-
-    # enable fan
-    # GPIO.output(FAN, False)
 
 
 def standby():
