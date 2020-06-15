@@ -4,7 +4,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from .gpio import initGPIO, heat, cool, standby
+from .gpio import initGPIO, heat, cool, standby, fan, light
 from .thermo import initThermo, temperature
 from enum import Enum
 
@@ -156,10 +156,17 @@ async def startProfile():
 def setProfileTarget(pid, startTime):
     global state
     elapsed = time.time() - startTime
-    if elapsed < 280:
+    if elapsed < 260:
         pid.setpoint = 250
     else:
-        pid.setpoint = 23
+        if pid.setpoint != 23:
+            light(True)
+            pid.setpoint = 23
+            pid.reset()
+
+        if temperature() < 140:
+            fan(True)
+
         if temperature() < 50:
             sch.remove_job('profile')
             state = State.STANDBY

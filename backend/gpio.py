@@ -36,6 +36,14 @@ def clearRelays():
         GPIO.output(r, True)
 
 
+def fan(state):
+    GPIO.output(FAN, not state)
+
+
+def light(state):
+    GPIO.output(LIGHT, not state)
+
+
 def heat():
     clearLEDs()
     clearRelays()
