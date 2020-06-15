@@ -155,9 +155,9 @@ def setProfileTarget(pid, startTime):
     global state
     state = State.PROFILE
     currTime = time.time()
-    if currTime < 100:
+    if currTime - startTime < 100:
         pid.setpoint = 175
-    elif currTime < 225:
+    elif currTime - startTime < 225:
         pid.setpoint = 240
     else:
         pid.setpoint = 23
