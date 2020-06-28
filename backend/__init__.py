@@ -144,6 +144,7 @@ async def startProfile():
     startTime = time.time()
     state = State.PROFILE
     pid.reset()
+    fan(True)
     sch.add_job(
         setProfileTarget,
         'interval',
@@ -170,8 +171,7 @@ def setProfileTarget(pid, startTime):
             sch.remove_job('profile')
             state = State.STANDBY
             standby()
-        elif temp < 140:
-            fan(True)
+            fan(False)
 
 
 @app.post('/stop')
@@ -187,4 +187,5 @@ async def stop():
     standby()
     state = State.STANDBY
     pid.setpoint = 23
+    fan(False)
     armed = False
